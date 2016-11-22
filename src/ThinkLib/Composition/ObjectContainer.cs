@@ -10,6 +10,15 @@ namespace ThinkLib.Composition
     public abstract class ObjectContainer : DisposableObject, IObjectContainer
     {
         /// <summary>
+        /// single instance
+        /// </summary>
+        public static IObjectContainer Instance
+        {
+            get;
+            internal set;
+        }
+
+        /// <summary>
         /// 类型注册
         /// </summary>
         public sealed class TypeRegistration

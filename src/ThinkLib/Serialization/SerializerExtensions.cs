@@ -21,6 +21,15 @@ namespace ThinkLib.Serialization
         /// <summary>
         /// 从字节数组反序列化一个对象。
         /// </summary>
+        public static object Deserialize(this IBinarySerializer serializer, byte[] data)
+        {
+            using (var stream = new MemoryStream(data)) {
+                return serializer.Deserialize(stream);
+            }
+        }
+        /// <summary>
+        /// 从字节数组反序列化一个对象。
+        /// </summary>
         public static T Deserialize<T>(this IBinarySerializer serializer, byte[] data, bool resolveType = false)
         {
             using (var stream = new MemoryStream(data)) {

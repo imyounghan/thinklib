@@ -10,6 +10,49 @@ namespace ThinkLib.Composition
     public static class ObjectContainerExtentions
     {
         /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static void RegisterMultiple(this IObjectContainer that, IEnumerable<Type> registrationTypes, object instance)
+        {
+            foreach (var registrationType in registrationTypes) {
+                that.RegisterInstance(registrationType, instance);
+            }
+        }
+
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static void RegisterMultiple(this IObjectContainer that, Type registrationType, IEnumerable<Type> implementationTypes)
+        {
+            that.RegisterMultiple(registrationType, implementationTypes, Lifecycle.Singleton);
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static void RegisterMultiple(this IObjectContainer that, Type registrationType, IEnumerable<Type> implementationTypes, Lifecycle lifecycle)
+        {
+            foreach (var implementationType in implementationTypes) {
+                that.RegisterType(registrationType, implementationType, implementationType.FullName, lifecycle);
+            }
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static void RegisterMultiple(this IObjectContainer that, IEnumerable<Type> registrationTypes, Type implementationType)
+        {
+            that.RegisterMultiple(registrationTypes, implementationType, Lifecycle.Singleton);
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static void RegisterMultiple(this IObjectContainer that, IEnumerable<Type> registrationTypes, Type implementationType, Lifecycle lifecycle)
+        {
+            foreach (var registrationType in registrationTypes) {
+                that.RegisterType(registrationType, implementationType, lifecycle);
+            }
+        }
+
+        /// <summary>
         /// 注册一个实例
         /// </summary>
         /// <param name="that">容器</param>

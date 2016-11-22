@@ -41,21 +41,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Annotation\CacheRegionAttribute.cs" />
+    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="BootstrapperExtentions.cs" />
     <Compile Include="Composition\IInitializer.cs" />
     <Compile Include="Annotation\LifeCycleAttribute.cs" />
     <Compile Include="Composition\Lifecycle.cs" />
@@ -74,11 +73,6 @@
     <Compile Include="Utilities\HttpUtils.cs" />
     <Compile Include="Utilities\LockUtil.cs" />
     <Compile Include="Utilities\RandomUtils.cs" />
-    <Compile Include="Database\Context\ContextManager.cs" />
-    <Compile Include="Database\Context\CurrentContext.cs" />
-    <Compile Include="Database\Context\IContext.cs" />
-    <Compile Include="Database\Context\IContextManager.cs" />
-    <Compile Include="Database\Context\ICurrentContext.cs" />
     <Compile Include="Interception\GetNextInterceptorDelegate.cs" />
     <Compile Include="Interception\IInterceptor.cs" />
     <Compile Include="Interception\IInterceptorProvider.cs" />
@@ -95,25 +89,11 @@
     <Compile Include="Interception\Pipeline\InterceptorPipelineKey.cs" />
     <Compile Include="Interception\Pipeline\InterceptorPipelineManager.cs" />
     <Compile Include="Interception\ParameterCollection.cs" />
-    <Compile Include="Annotation\TransactionAttribute.cs" />
     <Compile Include="Serialization\DefaultBinarySerializer.cs" />
     <Compile Include="Serialization\DefaultTextSerializer.cs" />
     <Compile Include="Serialization\IBinarySerializer.cs" />
     <Compile Include="Serialization\ITextSerializer.cs" />
     <Compile Include="Serialization\SerializerExtensions.cs" />
-    <Compile Include="Database\Criteria.cs" />
-    <Compile Include="Database\DataContextBase.cs" />
-    <Compile Include="Database\DataContextExtentions.cs" />
-    <Compile Include="Database\ICriteria.cs" />
-    <Compile Include="Database\IDataContext.cs" />
-    <Compile Include="Database\IDataContextFactory.cs" />
-    <Compile Include="Database\ILifecycle.cs" />
-    <Compile Include="Database\ISortItem.cs" />
-    <Compile Include="Database\ISortSet.cs" />
-    <Compile Include="Database\IValidatable.cs" />
-    <Compile Include="Database\LifecycleVeto.cs" />
-    <Compile Include="Database\MemoryContextFactory.cs" />
-    <Compile Include="Database\SortSet.cs" />
     <Compile Include="Extensions\ConcurrentDictionaryExtensions.cs" />
     <Compile Include="Extensions\ConcurrentQueueExtensions.cs" />
     <Compile Include="Extensions\DataReaderExtentions.cs" />
