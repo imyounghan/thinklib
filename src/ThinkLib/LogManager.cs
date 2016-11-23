@@ -317,7 +317,7 @@ namespace ThinkLib
                     }
                 }
 
-                Trace.WriteLine(log.ToString(), "ThinkNet");
+                Trace.WriteLine(log.ToString(), "ThinkLog");
             }
 
             public void Debug(object message, Exception exception = null)
@@ -638,7 +638,7 @@ namespace ThinkLib
         /// <summary>
         /// 表示这是一个默认的日志程序。
         /// </summary>
-        public static ILogger Default { get { return GetLogger("ThinkNet"); } }
+        public static ILogger Default { get { return GetLogger("ThinkLog"); } }
 
 
         private readonly static ConcurrentDictionary<string, ILogger> loggers;
@@ -653,7 +653,7 @@ namespace ThinkLib
                 return loggers.GetOrAdd(name, _ => CreateLogger(name, null));
             }
 
-            if (name.Equals("ThinkNet", StringComparison.CurrentCulture))
+            if (name.Equals("ThinkLog", StringComparison.CurrentCulture))
                 return DefaultLogger.Instance;
 
             return EmptyLogger.Instance;

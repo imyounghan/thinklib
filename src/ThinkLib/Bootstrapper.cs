@@ -374,7 +374,7 @@ namespace ThinkLib
         /// <summary>
         /// 设置组件
         /// </summary>
-        public Bootstrapper SetDefault(Type type, string name, Lifecycle lifecycle)
+        public Bootstrapper SetDefault(Type type, string name, Lifecycle lifecycle = Lifecycle.Singleton)
         {
             if (this.Status != ServerStatus.Running) {
                 throw new ApplicationException("system is working, can not register type, please execute before 'Done' method.");
@@ -389,7 +389,7 @@ namespace ThinkLib
         /// <summary>
         /// 设置组件
         /// </summary>
-        public Bootstrapper SetDefault(Type from, Type to, string name, Lifecycle lifecycle)
+        public Bootstrapper SetDefault(Type from, Type to, string name, Lifecycle lifecycle = Lifecycle.Singleton)
         {
             if (this.Status != ServerStatus.Running) {
                 throw new ApplicationException("system is working, can not register type, please execute before 'done' method.");
@@ -429,6 +429,58 @@ namespace ThinkLib
             this.SetDefault<IBinarySerializer, DefaultBinarySerializer>();
             this.SetDefault<ITextSerializer, DefaultTextSerializer>();
             this.SetDefault<IInterceptorProvider, InterceptorProvider>();
+        }
+    }
+
+    /// <summary>
+    /// <see cref="Bootstrapper"/> 的扩展类
+    /// </summary>
+    public static class BootstrapperExtentions
+    {
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static Bootstrapper SetDefault(this Bootstrapper that, Type type, Lifecycle lifecycle = Lifecycle.Singleton)
+        {
+            return that.SetDefault(type, (string)null, lifecycle);
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static Bootstrapper SetDefault(this Bootstrapper that, Type from, Type to, Lifecycle lifecycle = Lifecycle.Singleton)
+        {
+            return that.SetDefault(from, to, (string)null, lifecycle);
+        }        
+
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static Bootstrapper SetDefault<T>(this Bootstrapper that, Lifecycle lifecycle = Lifecycle.Singleton)
+        {
+            return that.SetDefault<T>((string)null, lifecycle);
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static Bootstrapper SetDefault<T>(this Bootstrapper that, string name, Lifecycle lifecycle = Lifecycle.Singleton)
+        {
+            return that.SetDefault(typeof(T), name, lifecycle);
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static Bootstrapper SetDefault<TFrom, TTo>(this Bootstrapper that, Lifecycle lifecycle = Lifecycle.Singleton)
+            where TTo : TFrom
+        {
+            return that.SetDefault<TFrom, TTo>((string)null, lifecycle);
+        }
+        /// <summary>
+        /// 注册类型
+        /// </summary>
+        public static Bootstrapper SetDefault<TFrom, TTo>(this Bootstrapper that, string name, Lifecycle lifecycle = Lifecycle.Singleton)
+            where TTo : TFrom
+        {
+            return that.SetDefault(typeof(TFrom), typeof(TTo), name, lifecycle);
         }
     }
 }

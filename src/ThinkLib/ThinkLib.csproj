@@ -54,7 +54,6 @@
   <ItemGroup>
     <Compile Include="Annotation\CacheRegionAttribute.cs" />
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="BootstrapperExtentions.cs" />
     <Compile Include="Composition\IInitializer.cs" />
     <Compile Include="Annotation\LifeCycleAttribute.cs" />
     <Compile Include="Composition\Lifecycle.cs" />

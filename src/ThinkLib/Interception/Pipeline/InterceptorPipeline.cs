@@ -7,6 +7,11 @@ namespace ThinkLib.Interception.Pipeline
     /// </summary>
     public class InterceptorPipeline
     {
+        /// <summary>
+        /// 一个空的拦截器的管道
+        /// </summary>
+        public static readonly InterceptorPipeline Empty = new InterceptorPipeline();
+
         private readonly IList<IInterceptor> _interceptors;
 
         /// <summary>

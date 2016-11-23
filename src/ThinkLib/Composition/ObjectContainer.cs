@@ -92,6 +92,7 @@ namespace ThinkLib.Composition
         protected ObjectContainer()
         {
             this._registeredTypes = new List<TypeRegistration>();
+            this.RegisterInstance<IObjectContainer>(this);
         }
 
         /// <summary>

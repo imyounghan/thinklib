@@ -9,7 +9,7 @@ namespace ThinkLib.Interception.Pipeline
     /// </summary>
     public class InterceptorPipelineManager
     {
-        private static readonly InterceptorPipeline EmptyPipeline = new InterceptorPipeline();
+        //private static readonly InterceptorPipeline EmptyPipeline = new InterceptorPipeline();
 
         /// <summary>
         /// 一个 <see cref="InterceptorPipelineManager"/> 的实例
@@ -27,7 +27,7 @@ namespace ThinkLib.Interception.Pipeline
             if (pipelines.ContainsKey(key))
                 return pipelines[key];
 
-            return EmptyPipeline;
+            return InterceptorPipeline.Empty;
         }
 
         /// <summary>
@@ -59,18 +59,34 @@ namespace ThinkLib.Interception.Pipeline
             return pipelines[key] = CreatePipeline(method.GetBaseDefinition(), interceptors);
         }
 
+        ///// <summary>
+        ///// 创建并返回当前方法的拦截器管道
+        ///// </summary>
+        //public InterceptorPipeline CreatePipeline(MethodInfo method, Func<IEnumerable<IInterceptor>> getInterceptors)
+        //{
+        //    var key = InterceptorPipelineKey.ForMethod(method);
+
+        //    if (pipelines.ContainsKey(key))
+        //        return pipelines[key];
+
+        //    if (method.GetBaseDefinition() == method)
+        //        return pipelines[key] = new InterceptorPipeline(getInterceptors());
+
+        //    return pipelines[key] = CreatePipeline(method.GetBaseDefinition(), getInterceptors);
+        //}
+
         /// <summary>
         /// 创建并返回当前方法的拦截器管道
         /// </summary>
-        public InterceptorPipeline CreatePipeline(MethodInfo method, Func<IEnumerable<IInterceptor>> getInterceptors)
+        public InterceptorPipeline CreatePipeline(MethodInfo method, Func<MethodInfo, IEnumerable<IInterceptor>> getInterceptors)
         {
             var key = InterceptorPipelineKey.ForMethod(method);
 
-            if (pipelines.ContainsKey(key))
+            if(pipelines.ContainsKey(key))
                 return pipelines[key];
 
-            if (method.GetBaseDefinition() == method)
-                return pipelines[key] = new InterceptorPipeline(getInterceptors());
+            if(method.GetBaseDefinition() == method)
+                return pipelines[key] = new InterceptorPipeline(getInterceptors(method));
 
             return pipelines[key] = CreatePipeline(method.GetBaseDefinition(), getInterceptors);
         }

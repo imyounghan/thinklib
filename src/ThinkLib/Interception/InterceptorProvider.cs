@@ -26,7 +26,7 @@ namespace ThinkLib.Interception
                 GetFilters(method).OrderBy(filter => filter, _filterComparer);
 
             return RemoveDuplicates(combinedFilters)
-                .Select(filter => filter.Attribute.CreateInterceptor(null));
+                .Select(filter => filter.Attribute.CreateInterceptor(ObjectContainer.Instance));
         }
 
         #endregion
