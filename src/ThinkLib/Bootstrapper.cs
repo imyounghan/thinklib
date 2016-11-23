@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using ThinkLib.Annotation;
 using ThinkLib.Composition;
 using ThinkLib.Interception;
@@ -21,9 +22,21 @@ namespace ThinkLib
             /// <summary>
             /// Parameterized constructor.
             /// </summary>
+            public Component(Type type, string name, object instance)
+            {
+                this.ContractType = type;
+                this.ContractName = name ?? string.Empty;
+                this.Instance = instance;
+                this.TargetType = instance.GetType();
+                this.Lifecycle = Lifecycle.Singleton;
+            }
+
+            /// <summary>
+            /// Parameterized constructor.
+            /// </summary>
             public Component(Type type, string name, Lifecycle lifecycle)
             {
-                this.ForType = type;
+                this.TargetType = type;
                 this.ContractName = name ?? string.Empty;
                 this.Lifecycle = lifecycle;
             }
@@ -39,7 +52,7 @@ namespace ThinkLib
             /// <summary>
             /// 要注册的名称
             /// </summary>
-            public string ContractName { get; set; }
+            public string ContractName { get; private set; }
             /// <summary>
             /// 要注册的类型
             /// </summary>
@@ -47,7 +60,11 @@ namespace ThinkLib
             /// <summary>
             /// 要注册类型的实现类型
             /// </summary>
-            public Type ForType { get; private set; }
+            public Type TargetType { get; private set; }
+            /// <summary>
+            /// 要注册类型的实例
+            /// </summary>
+            public object Instance { get; private set; }
             /// <summary>
             /// 生命周期
             /// </summary>
@@ -55,7 +72,7 @@ namespace ThinkLib
 
             private Type GetServiceType()
             {
-                return this.ContractType ?? this.ForType;
+                return this.ContractType ?? this.TargetType;
             }
 
             /// <summary>
@@ -67,6 +84,9 @@ namespace ThinkLib
 
                 if (other == null)
                     return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
 
                 if (this.GetServiceType() != other.GetServiceType())
                     return false;
@@ -81,25 +101,35 @@ namespace ThinkLib
             /// </summary>
             public override int GetHashCode()
             {
-                return String.Concat(this.GetServiceType().FullName, "|", this.ContractName).GetHashCode();
+                return this.ToString().GetHashCode();
             }
 
-            internal int GetUniqueCode()
+            public override string ToString()
             {
-                if (IsInitializeType(this.ForType))
-                    return this.ForType.GetHashCode();
+                var sb = new StringBuilder();
+                sb.Append(this.GetServiceType().FullName);
+                if (!string.IsNullOrEmpty(this.ContractName))
+                    sb.Append("|").Append(this.ContractName);
 
-                if (IsInitializeType(this.ContractType))
-                    return this.ContractType.GetHashCode();
-
-
-                return this.GetHashCode();
+                return sb.ToString();
             }
+
+            //internal int GetUniqueCode()
+            //{
+            //    if (IsInitializeType(this.TargetType))
+            //        return this.TargetType.GetHashCode();
+
+            //    if (IsInitializeType(this.ContractType))
+            //        return this.ContractType.GetHashCode();
+
+
+            //    return this.GetHashCode();
+            //}
 
             internal bool MustbeInitialize()
             {
                 return this.Lifecycle == Lifecycle.Singleton &&
-                    (IsInitializeType(this.ContractType) || IsInitializeType(this.ForType));
+                    (IsInitializeType(this.ContractType) || IsInitializeType(this.TargetType) || (this.Instance is IInitializer));
             }
 
             private static bool IsInitializeType(Type type)
@@ -109,6 +139,9 @@ namespace ThinkLib
 
             internal object GetInstance(IObjectContainer container)
             {
+                if (this.Instance != null)
+                    return this.Instance;
+
                 var serviceType = this.GetServiceType();
                 var key = this.ContractName;
                 return string.IsNullOrWhiteSpace(key) ?
@@ -122,25 +155,30 @@ namespace ThinkLib
                     return;
                 }
 
+                if (this.Instance != null) {
+                    container.RegisterInstance(this.ContractType, this.ContractName, this.Instance);
+                    return;
+                }
+
                 if (this.ContractType == null)
-                    container.RegisterType(this.ForType, this.ContractName, this.Lifecycle);
+                    container.RegisterType(this.TargetType, this.ContractName, this.Lifecycle);
                 else
-                    container.RegisterType(this.ContractType, this.ForType, this.ContractName, this.Lifecycle);
+                    container.RegisterType(this.ContractType, this.TargetType, this.ContractName, this.Lifecycle);
             }
         }
 
-        class ComponentComparer : IEqualityComparer<Component>
-        {
-            public bool Equals(Component x, Component y)
-            {
-                return x.ForType == y.ForType;
-            }
+        //class ComponentComparer : IEqualityComparer<Component>
+        //{
+        //    public bool Equals(Component x, Component y)
+        //    {
+        //        return x.TargetType == y.TargetType;
+        //    }
 
-            public int GetHashCode(Component obj)
-            {
-                return obj.ForType.FullName.GetHashCode();
-            }
-        }
+        //    public int GetHashCode(Component obj)
+        //    {
+        //        return obj.TargetType.GetHashCode();
+        //    }
+        //}
 
         /// <summary>
         /// 服务状态
@@ -148,39 +186,19 @@ namespace ThinkLib
         public enum ServerStatus
         {
             /// <summary>
-            /// 启动中
-            /// </summary>
-            Starting,
-            /// <summary>
             /// 运行中
             /// </summary>
             Running,
+            /// <summary>
+            /// 已启动
+            /// </summary>
+            Started,
             /// <summary>
             /// 已停止
             /// </summary>
             Stopped
         }
-
-        public class AssembliesLoadedEventArgs : EventArgs
-        {
-            internal AssembliesLoadedEventArgs(List<Assembly> assemblies)
-            {
-                this.Assemblies = assemblies;
-                this.NonAbstractTypes= assemblies.SelectMany(assembly => assembly.GetTypes())
-                    .Where(type => type.IsClass && !type.IsAbstract).ToArray();
-            }
-
-            /// <summary>
-            /// 程序集列表
-            /// </summary>
-            public IEnumerable<Assembly> Assemblies { get; private set; }
-
-            /// <summary>
-            /// 所有的非抽象类型
-            /// </summary>
-            public IEnumerable<Type> NonAbstractTypes { get; private set; }
-        }
-
+        
         /// <summary>
         /// 当前配置
         /// </summary>
@@ -198,15 +216,9 @@ namespace ThinkLib
             this._assemblies = new List<Assembly>();
             this._components = new HashSet<Component>();
             this._stopwatch = Stopwatch.StartNew();
-            this.Status = ServerStatus.Starting;            
+            this.Status = ServerStatus.Running;            
         }
         
-
-        /// <summary>
-        /// 表示程序集加载完成后的处理方式
-        /// </summary>
-        public event EventHandler<AssembliesLoadedEventArgs> AssembliesLoaded = (sender, args) => { };
-
         /// <summary>
         /// 当前服务器状态
         /// </summary>
@@ -258,6 +270,34 @@ namespace ThinkLib
             return this.LoadAssemblies(assemblies);
         }
 
+        /// <summary>
+        /// 启动相关Processes
+        /// </summary>
+        public virtual void Start()
+        {
+            if (this.Status == ServerStatus.Started)
+                return;
+
+            this.Status = ServerStatus.Started;
+        }
+        /// <summary>
+        /// 停止相关Processes
+        /// </summary>
+        public virtual void Stop() 
+        {
+            if (this.Status == ServerStatus.Stopped)
+                return;
+
+
+            this.Status = ServerStatus.Stopped;
+        }
+
+        /// <summary>
+        /// 表示程序集加载完成后的处理方式
+        /// </summary>
+        protected virtual void OnAssembliesLoaded(IEnumerable<Assembly> assemblies, IEnumerable<Type> nonAbstractTypes)
+        { }
+
         
         ///// <summary>
         ///// 配置完成。
@@ -272,7 +312,7 @@ namespace ThinkLib
         /// </summary>
         public void Done(IObjectContainer container)
         {
-            if (this.Status == ServerStatus.Running) {
+            if (this.Status != ServerStatus.Running) {
                 return;
             }
             
@@ -287,12 +327,12 @@ namespace ThinkLib
                 Console.WriteLine("]");
             }
 
-            var args = new AssembliesLoadedEventArgs(_assemblies);
+            var nonAbstractTypes = _assemblies.SelectMany(assembly => assembly.GetTypes())
+                    .Where(type => type.IsClass && !type.IsAbstract).ToArray();
 
-            this.RegisterComponents(args.NonAbstractTypes);
-            this.RegisterDefaultComponents();
-
-            this.AssembliesLoaded(this, new AssembliesLoadedEventArgs(_assemblies));
+            this.RegisterComponents(nonAbstractTypes);
+            this.OnAssembliesLoaded(_assemblies, nonAbstractTypes);
+            this.RegisterDefaultComponents();            
 
             _components.ForEach(item => item.Register(container));
 
@@ -308,11 +348,27 @@ namespace ThinkLib
             _assemblies = null;
             _components = null;
 
-            this.Status = ServerStatus.Running;
+            this.Start();
 
             _stopwatch.Stop();
 
-            Console.WriteLine("system is running, used time:{0}ms.\r\n", _stopwatch.ElapsedMilliseconds);
+            Console.WriteLine("system is working, used time:{0}ms.\r\n", _stopwatch.ElapsedMilliseconds);
+        }
+
+
+        /// <summary>
+        /// 设置组件
+        /// </summary>
+        public Bootstrapper SetDefault(Type type, string name, object instance )
+        {
+            if (this.Status != ServerStatus.Running) {
+                throw new ApplicationException("system is working, can not register type, please execute before 'Done' method.");
+            }
+            type.NotNull("type");
+
+            _components.Add(new Component(type, name, instance));
+
+            return this;
         }
 
         /// <summary>
@@ -320,8 +376,8 @@ namespace ThinkLib
         /// </summary>
         public Bootstrapper SetDefault(Type type, string name, Lifecycle lifecycle)
         {
-            if (this.Status != ServerStatus.Starting) {
-                throw new ApplicationException("system is running, can not register type, please execute before 'Done' method.");
+            if (this.Status != ServerStatus.Running) {
+                throw new ApplicationException("system is working, can not register type, please execute before 'Done' method.");
             }
             type.NotNull("type");
 
@@ -335,8 +391,8 @@ namespace ThinkLib
         /// </summary>
         public Bootstrapper SetDefault(Type from, Type to, string name, Lifecycle lifecycle)
         {
-            if (this.Status != ServerStatus.Starting) {
-                throw new ApplicationException("system is running, can not register type, please execute before 'done' method.");
+            if (this.Status != ServerStatus.Running) {
+                throw new ApplicationException("system is working, can not register type, please execute before 'done' method.");
             }
             from.NotNull("from");
             to.NotNull("to");
