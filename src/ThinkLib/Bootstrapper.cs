@@ -156,7 +156,7 @@ namespace ThinkLib
                 }
 
                 if (this.Instance != null) {
-                    container.RegisterInstance(this.ContractType, this.ContractName, this.Instance);
+                    container.RegisterInstance(this.ContractType, this.Instance, this.ContractName);
                     return;
                 }
 
@@ -332,9 +332,14 @@ namespace ThinkLib
 
             this.RegisterComponents(nonAbstractTypes);
             this.OnAssembliesLoaded(_assemblies, nonAbstractTypes);
-            this.RegisterDefaultComponents();            
+            this.RegisterDefaultComponents();
 
             _components.ForEach(item => item.Register(container));
+
+            var initializer = container as IInitializer;
+            if (initializer != null) {
+                initializer.Initialize(container, null);
+            }
 
             _components.Where(item => item.MustbeInitialize())
                 .Select(item => item.GetInstance(container))

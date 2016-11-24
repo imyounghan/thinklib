@@ -12,6 +12,16 @@ namespace ThinkLib.Interception
     /// </summary>
     public class InterceptorProvider : IInterceptorProvider
     {
+        private readonly IObjectContainer container;
+
+        /// <summary>
+        /// Parameterized Constructor.
+        /// </summary>
+        public InterceptorProvider(IObjectContainer container)
+        {
+            this.container = container;
+        }
+
 
         private static FilterComparer _filterComparer = new FilterComparer();
 
@@ -26,7 +36,7 @@ namespace ThinkLib.Interception
                 GetFilters(method).OrderBy(filter => filter, _filterComparer);
 
             return RemoveDuplicates(combinedFilters)
-                .Select(filter => filter.Attribute.CreateInterceptor(ObjectContainer.Instance));
+                .Select(filter => filter.Attribute.CreateInterceptor(container));
         }
 
         #endregion

@@ -11,22 +11,22 @@ namespace ThinkLib.Composition
         /// <summary>
         /// 判断此类型是否已注册
         /// </summary>
-        bool IsRegistered(Type type, string name);
+        bool IsRegistered(Type type, string name = null);
 
         /// <summary>
         /// 注册一个类型
         /// </summary>
-        void RegisterInstance(Type type, string name, object instance);
+        void RegisterInstance(Type type, object instance, string name = null);
 
         /// <summary>
         /// 注册一个类型
         /// </summary>
-        void RegisterType(Type type, string name, Lifecycle lifetime);
+        void RegisterType(Type type, string name, Lifecycle lifetime = Lifecycle.Singleton);
 
         /// <summary>
         /// 注册一个类型
         /// </summary>
-        void RegisterType(Type from, Type to, string name, Lifecycle lifetime);
+        void RegisterType(Type from, Type to, string name, Lifecycle lifetime = Lifecycle.Singleton);
 
 
 
@@ -34,7 +34,7 @@ namespace ThinkLib.Composition
         /// <summary>
         /// 获取类型对应的实例
         /// </summary>
-        object Resolve(Type type, string name);
+        object Resolve(Type type, string name = null);
         /// <summary>
         /// 获取类型所有的实例
         /// </summary>

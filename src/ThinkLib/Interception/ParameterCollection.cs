@@ -29,7 +29,7 @@ namespace ThinkLib.Interception
         private readonly object[] arguments;
 
         /// <summary>
-        /// Parameterized constructor.
+        /// Parameterized Constructor.
         /// </summary>
         public ParameterCollection(object[] arguments, ParameterInfo[] parameters, Predicate<ParameterInfo> isArgumentPartOfCollection)
         {

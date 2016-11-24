@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ThinkLib.Composition;
 
 namespace ThinkLib.Testing
 {
@@ -9,9 +10,13 @@ namespace ThinkLib.Testing
     {
         static void Main(string[] args)
         {
-            LogManager.Default.Debug("");
+            //LogManager.Default.Debug("starting...");
 
-            Bootstrapper.Current.DoneWithUnity();
+           var container = Bootstrapper.Current.DoneWithAutofac();
+
+           var instance = container.Resolve<IObjectContainer>();
+
+            Console.ReadKey();
         }
     }
 }

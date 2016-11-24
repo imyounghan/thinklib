@@ -7,7 +7,7 @@ namespace ThinkLib.Composition
     /// <summary>
     /// <see cref="IObjectContainer"/>抽象实现类
     /// </summary>
-    public abstract class ObjectContainer : DisposableObject, IObjectContainer
+    public abstract class ObjectContainer : DisposableObject, IObjectContainer//, IInitializer
     {
         /// <summary>
         /// single instance
@@ -91,8 +91,7 @@ namespace ThinkLib.Composition
         /// </summary>
         protected ObjectContainer()
         {
-            this._registeredTypes = new List<TypeRegistration>();
-            this.RegisterInstance<IObjectContainer>(this);
+            this._registeredTypes = new List<TypeRegistration>();            
         }
 
         /// <summary>
@@ -137,7 +136,7 @@ namespace ThinkLib.Composition
         public abstract bool IsRegistered(Type type, string name);
 
 
-        void IObjectContainer.RegisterInstance(Type type, string name, object instance)
+        void IObjectContainer.RegisterInstance(Type type, object instance, string name)
         {
             type.NotNull("type");
             instance.NotNull("instance");
@@ -198,5 +197,14 @@ namespace ThinkLib.Composition
 
             return _registeredTypes.Contains(new TypeRegistration(type, name)) || this.IsRegistered(type, name);
         }
+
+        //#region IInitializer 成员
+
+        //void IInitializer.Initialize(IObjectContainer container, IEnumerable<System.Reflection.Assembly> assemblies)
+        //{
+        //    container.RegisterInstance(container);
+        //}
+
+        //#endregion
     }
 }
