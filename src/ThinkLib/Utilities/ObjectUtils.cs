@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Script.Serialization;
 
-namespace ThinkNet.Common.Utilities
+namespace ThinkLib.Utilities
 {
     /// <summary>
     /// Object工具类
@@ -23,15 +22,15 @@ namespace ThinkNet.Common.Utilities
         /// <summary>
         /// 获取该类型下所有属性
         /// </summary>
-        public static PropertyInfo[] GetProperties(Type type)
+        public static PropertyInfo[] GetCachedProperties(Type type)
         {
-            return GetProperties(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            return GetCachedProperties(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
         /// <summary>
         /// 获取该类型下指定的所有属性
         /// </summary>
-        public static PropertyInfo[] GetProperties(Type type, BindingFlags bindingAttr)
+        public static PropertyInfo[] GetCachedProperties(Type type, BindingFlags bindingAttr)
         {
             return _entityInfosCache.GetOrAdd(type, key => type.GetProperties(bindingAttr));
         }
@@ -41,13 +40,7 @@ namespace ThinkNet.Common.Utilities
         /// </summary>
         public static PropertyInfo FindProperty(Type entityType, string propertyName)
         {
-            var predicate = new Func<PropertyInfo, bool>(property => string.Equals(property.Name, propertyName, StringComparison.CurrentCultureIgnoreCase));
-
-            var properties = GetProperties(entityType);
-            if (!properties.Any(predicate))
-                return null;
-
-            return properties.First(predicate);
+            return GetCachedProperties(entityType).SingleOrDefault(property => string.Equals(property.Name, propertyName, StringComparison.CurrentCultureIgnoreCase));
         }
 
 
@@ -56,8 +49,8 @@ namespace ThinkNet.Common.Utilities
         public static T CreateObject<T>(object source) where T : class, new()
         {
             var obj = new T();
-            var propertiesFromSource = GetProperties(source.GetType());
-            var properties = GetProperties(typeof(T));
+            var propertiesFromSource = GetCachedProperties(source.GetType());
+            var properties = GetCachedProperties(typeof(T));
 
             foreach (var property in properties) {
                 var sourceProperty = propertiesFromSource.FirstOrDefault(x => x.Name == property.Name);
@@ -75,11 +68,11 @@ namespace ThinkNet.Common.Utilities
             where TTarget : class
             where TSource : class
         {
-            Ensure.NotNull(target, "target");
-            Ensure.NotNull(source, "source");
-            Ensure.NotNull(propertyExpressionsFromSource, "propertyExpressionsFromSource");
+            target.NotNull("target");
+            source.NotNull( "source");
+            propertyExpressionsFromSource.NotNull("propertyExpressionsFromSource");
  
-            var properties = GetProperties(typeof(TTarget));// target.GetType().GetProperties();
+            var properties = GetCachedProperties(typeof(TTarget));// target.GetType().GetProperties();
 
             foreach (var propertyExpression in propertyExpressionsFromSource) {
                 var propertyFromSource = GetProperty<TSource, object>(propertyExpression);
@@ -170,7 +163,7 @@ namespace ThinkNet.Common.Utilities
         /// </summary>
         public static string GetObjectString(object obj)
         {
-            var properties = GetProperties(obj.GetType())
+            var properties = GetCachedProperties(obj.GetType())
                 .Where(prop => !prop.IsDefined<ScriptIgnoreAttribute>(false))
                 .Select(prop => string.Concat(prop.Name, "=", prop.GetValue(obj, null))).ToArray();
 

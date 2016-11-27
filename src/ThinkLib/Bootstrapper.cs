@@ -327,6 +327,8 @@ namespace ThinkLib
                 Console.WriteLine("]");
             }
 
+            ObjectContainer.Instance = container;
+
             var nonAbstractTypes = _assemblies.SelectMany(assembly => assembly.GetTypes())
                     .Where(type => type.IsClass && !type.IsAbstract).ToArray();
 

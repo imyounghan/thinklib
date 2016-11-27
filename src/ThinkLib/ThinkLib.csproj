@@ -58,6 +58,9 @@
     <Compile Include="Annotation\LifeCycleAttribute.cs" />
     <Compile Include="Composition\Lifecycle.cs" />
     <Compile Include="DisposableObject.cs" />
+    <Compile Include="Scheduling\Worker.cs" />
+    <Compile Include="Scheduling\TimeScheduler.cs" />
+    <Compile Include="Utilities\ObjectUtils.cs" />
     <Compile Include="Utilities\UniqueId.cs" />
     <Compile Include="Annotation\RegisterAttribute.cs" />
     <Compile Include="Caching\CacheConfiguration.cs" />
