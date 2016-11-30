@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using ThinkLib.Interception;
@@ -98,7 +99,7 @@ namespace ThinkLib.Annotation
                 if (string.IsNullOrEmpty(cacheKey)) {
                     cacheKey = CreateCacheKey(input);
                 }
-
+                IMethodReturn realReturn;
                 switch (_cachingAttribute.Method) {
                     case CachingAttribute.CachingMethod.Get:
                         if (TargetMethodReturnsVoid(input)) {
@@ -107,15 +108,16 @@ namespace ThinkLib.Annotation
 
                         var cache = this.GetOrBuildCache(cacheRegion);
 
-                        object cachedResult = cache.Get(cacheKey);
+                        var cachedResult = (object[])cache.Get(cacheKey);
                         if (cachedResult == null) {
-                            IMethodReturn realReturn = getNext()(input, getNext);
-                            cache.Put(cacheKey, realReturn.ReturnValue);
+                            realReturn = getNext()(input, getNext);
+                            cache.Put(cacheKey, new object[] { realReturn.ReturnValue, realReturn.Outputs });
 
                             return realReturn;
                         }
                         else {
-                            IMethodReturn cachedReturn = input.CreateMethodReturn(cachedResult, input.Arguments);
+                            var outputs =(cachedResult[1] as IParameterCollection).Cast<object>().ToArray();
+                            IMethodReturn cachedReturn = input.CreateMethodReturn(cachedResult[0], outputs);
                             return cachedReturn;
                         }
 
@@ -125,7 +127,7 @@ namespace ThinkLib.Annotation
                         }
 
                         IMethodReturn methodReturn = getNext().Invoke(input, getNext);
-                        this.GetOrBuildCache(cacheRegion).Put(cacheKey, methodReturn.ReturnValue);
+                        this.GetOrBuildCache(cacheRegion).Put(cacheKey, new object[] { methodReturn.ReturnValue, methodReturn.Outputs });
 
                         return methodReturn;
                     case CachingAttribute.CachingMethod.Remove:

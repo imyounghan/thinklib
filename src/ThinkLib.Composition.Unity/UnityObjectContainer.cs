@@ -29,8 +29,6 @@ namespace ThinkLib.Composition
 
         public override void RegisterInstance(Type type, string name, object instance)
         {
-            name.NotWhiteSpace("name");
-
             var lifetime = new ContainerControlledLifetimeManager();
             if(string.IsNullOrEmpty(name)) {
                 _container.RegisterInstance(type, instance, lifetime);
@@ -42,8 +40,6 @@ namespace ThinkLib.Composition
 
         public override void RegisterType(Type type, string name, Lifecycle lifecycle)
         {
-            name.NotWhiteSpace("name");
-
             var lifetime = GetLifetimeManager(lifecycle);
 
             //var injectionMembers = InterceptionBehaviorMap.Instance.GetBehaviorTypes(type)
@@ -75,8 +71,6 @@ namespace ThinkLib.Composition
 
         public override void RegisterType(Type from, Type to, string name, Lifecycle lifecycle)
         {
-            name.NotWhiteSpace("name");
-
             var lifetimeManager = GetLifetimeManager(lifecycle);
 
             //var serviceBehaviorTypes = InterceptionBehaviorMap.Instance.GetBehaviorTypes(from);
